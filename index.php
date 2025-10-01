@@ -13,8 +13,10 @@
     <div id="map"></div>
 
     <?php
-    // Ejemplo: capa de puntos (ej. tabla "puntos" con columna geom en SRID 4326)
-    $sql = "SELECT id, nombre, ST_AsGeoJSON(geom) as geojson FROM puntos LIMIT 50;";
+    // Ejemplo: capa de puntos (ej. tabla "mov_centros_serviciodetransito_9377" con columna geom en SRID 9377)
+ $sql = "SELECT gid, nombre, direccion, ST_AsGeoJSON(ST_Transform(geom, 4326)) as geojson 
+            FROM mov_centros_serviciodetransito_9377 
+            LIMIT 50;";
     $result = pg_query($conn, $sql);
 
     $features = [];
@@ -24,8 +26,9 @@
             "type" => "Feature",
             "geometry" => $geometry,
             "properties" => [
-                "id" => $row['id'],
-                "nombre" => $row['nombre']
+                "gid" => $row['gid'],
+                "nombre" => $row['nombre'],
+                "direccion" => $row['direccion']
             ]
         ];
         $features[] = $feature;
@@ -53,7 +56,7 @@
     L.geoJSON(geojsonData, {
         onEachFeature: function (feature, layer) {
             if (feature.properties && feature.properties.nombre) {
-                layer.bindPopup("Nombre: " + feature.properties.nombre);
+                layer.bindPopup("Nombre: " + feature.properties.nombre + "<br>Dirección: " + feature.properties.direccion);
             }
         }
     }).addTo(map);
